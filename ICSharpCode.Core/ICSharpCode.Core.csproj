@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>SharpDeveloper Team</Authors>
+    <Company>SharpDeveloper Team</Company>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>Es un port simple a .netstandard2.0</Description>
+    <Copyright>MIT</Copyright>
+    <PackageLicenseUrl>https://github.com/TetradogOther/ICSharpCode.Core/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/TetradogOther/ICSharpCode.Core/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TetradogOther/ICSharpCode.Core/blob/master/LICENSE</RepositoryUrl>
+    <Version>1.0.0-Preview1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" />
+    <PackageReference Include="Portable.Xaml" Version="0.24.0" />
+  </ItemGroup>
 
 </Project>
