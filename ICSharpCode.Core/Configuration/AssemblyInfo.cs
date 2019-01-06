@@ -23,8 +23,6 @@ using System.Runtime.CompilerServices;
 [assembly: CLSCompliant(true)]
 [assembly: StringFreezing()]
 
-
-
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

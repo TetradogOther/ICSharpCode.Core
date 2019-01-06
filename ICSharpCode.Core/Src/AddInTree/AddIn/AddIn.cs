@@ -34,7 +34,7 @@ namespace ICSharpCode.Core
 		
 		internal string addInFileName = null;
 		AddInManifest manifest = new AddInManifest();
-		SortedList<string, ExtensionPath> paths = new SortedList<string, ExtensionPath>();
+		Dictionary<string, ExtensionPath> paths = new Dictionary<string, ExtensionPath>();
 		AddInAction action = AddInAction.Disable;
 		bool enabled;
 		
@@ -193,7 +193,7 @@ namespace ICSharpCode.Core
 			get { return manifest; }
 		}
 		
-		public SortedList<string, ExtensionPath> Paths {
+		public Dictionary<string, ExtensionPath> Paths {
 			get { return paths; }
 		}
 		

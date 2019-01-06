@@ -46,7 +46,7 @@ namespace ICSharpCode.Core
 		public static List<Codon> Sort(IEnumerable<IEnumerable<Codon>> codonInput)
 		{
 			// Step 1: create nodes for graph
-			SortedList<string, Node> nameToNodeDict = new SortedList<string, Node>();
+			Dictionary<string, Node> nameToNodeDict = new Dictionary<string, Node>();
 			List<Node> allNodes = new List<Node>();
 			foreach (IEnumerable<Codon> codonList in codonInput) {
 				// create entries to preserve order within

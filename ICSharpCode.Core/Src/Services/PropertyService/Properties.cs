@@ -73,7 +73,7 @@ namespace ICSharpCode.Core
 		// - XElement: serialized object
 		// - object[]: a stored list (array elements are null, string or XElement)
 		// - Properties: nested properties container
-		SortedList<string, object> dict = new SortedList<string, object>();
+		Dictionary<string, object> dict = new Dictionary<string, object>();
 		
 		#region Constructor
 		public Properties()

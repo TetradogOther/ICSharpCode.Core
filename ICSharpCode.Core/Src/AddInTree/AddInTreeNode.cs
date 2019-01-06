@@ -30,14 +30,14 @@ namespace ICSharpCode.Core
 	public sealed class AddInTreeNode
 	{
 		readonly object lockObj = new object();
-		SortedList<string, AddInTreeNode> childNodes = new SortedList<string, AddInTreeNode>();
+		Dictionary<string, AddInTreeNode> childNodes = new Dictionary<string, AddInTreeNode>();
 		ReadOnlyCollection<Codon> codons;
 		List<IList<Codon>> codonInput;
 		
 		/// <summary>
 		/// A dictionary containing the child paths.
 		/// </summary>
-		public SortedList<string, AddInTreeNode> ChildNodes {
+		public Dictionary<string, AddInTreeNode> ChildNodes {
 			get {
 				return childNodes;
 			}

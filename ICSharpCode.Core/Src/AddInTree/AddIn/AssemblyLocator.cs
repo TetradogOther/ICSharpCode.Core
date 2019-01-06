@@ -27,7 +27,7 @@ namespace ICSharpCode.Core
 	// in the Load context.
 	static class AssemblyLocator
 	{
-		static SortedList<string, Assembly> assemblies = new SortedList<string, Assembly>();
+		static Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
 		static bool initialized;
 		
 		public static void Init()

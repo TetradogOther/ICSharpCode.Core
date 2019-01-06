@@ -132,7 +132,7 @@ namespace ICSharpCode.Core
 			if (version.StartsWith("@")) {
 				if (version == "@SharpDevelopCoreVersion") {
 					if (entryVersion == null)
-						entryVersion = new Version();
+						entryVersion = new Version(1, 0, 0, 0);
 					return entryVersion;
 				}
 				if (hintPath != null) {

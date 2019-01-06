@@ -52,7 +52,7 @@ namespace ICSharpCode.Core
 	{
 		List<AddIn>   addIns   = new List<AddIn>();
 		AddInTreeNode rootNode = new AddInTreeNode();
-
+		
 		ConcurrentDictionary<string, IDoozer> doozers = new ConcurrentDictionary<string, IDoozer>();
 		ConcurrentDictionary<string, IConditionEvaluator> conditionEvaluators = new ConcurrentDictionary<string, IConditionEvaluator>();
 		
@@ -139,23 +139,24 @@ namespace ICSharpCode.Core
 		/// <see cref="TreePathNotFoundException"/> when the path does not exist.
 		/// If set to <c>false</c>, <c>null</c> is returned for non-existing paths.
 		/// </param>
-		public AddInTreeNode GetTreeNode(string path, bool throwOnNotFound = false)
+		public AddInTreeNode GetTreeNode(string path, bool throwOnNotFound = true)
 		{
-
+			
 			string[] splittedPath;
-			AddInTreeNode curPath = rootNode;
-
+			AddInTreeNode curPathAnt = rootNode;
+			AddInTreeNode curPath = curPathAnt;
 			if (!string.IsNullOrEmpty(path))
 			{
 				splittedPath = path.Split('/');
 				for (int i = 0; i < splittedPath.Length && curPath != null; i++)
 				{
-					if (!curPath.ChildNodes.TryGetValue(splittedPath[i], out curPath))
+					if (!curPathAnt.ChildNodes.TryGetValue(splittedPath[i], out curPath))
 					{
 						if (throwOnNotFound)
 							throw new TreePathNotFoundException(path);
 
 					}
+					curPathAnt = curPath;//para el debug :)
 				}
 			}
 			return curPath;
@@ -192,35 +193,27 @@ namespace ICSharpCode.Core
 		/// path is not found.</param>
 		public IReadOnlyList<T> BuildItems<T>(string path, object parameter, bool throwOnNotFound = true)
 		{
-			IReadOnlyList<T> nodeLst;
 			AddInTreeNode node = GetTreeNode(path, throwOnNotFound);
-			
 			if (node == null)
-				nodeLst= new List<T>();
+				return new List<T>();
 			else
-				nodeLst= node.BuildChildItems<T>(parameter);
-
-			return nodeLst;
+				return node.BuildChildItems<T>(parameter);
 		}
 		
 		AddInTreeNode CreatePath(AddInTreeNode localRoot, string path)
 		{
-		
-			string[] splittedPath;
+			if (path == null || path.Length == 0) {
+				return localRoot;
+			}
+			string[] splittedPath = path.Split('/');
 			AddInTreeNode curPath = localRoot;
-
-			if (!string.IsNullOrEmpty(path))
-			{
-				splittedPath = path.Split('/');
-				for (int i = 0; i < splittedPath.Length; i++)
-				{
-					if (!curPath.ChildNodes.ContainsKey(splittedPath[i]))
-					{
-						curPath.ChildNodes[splittedPath[i]] = new AddInTreeNode();
-					}
-					curPath = curPath.ChildNodes[splittedPath[i]];
-
+			int i = 0;
+			while (i < splittedPath.Length) {
+				if (!curPath.ChildNodes.ContainsKey(splittedPath[i])) {
+					curPath.ChildNodes[splittedPath[i]] = new AddInTreeNode();
 				}
+				curPath = curPath.ChildNodes[splittedPath[i]];
+				++i;
 			}
 			
 			return curPath;
@@ -229,9 +222,8 @@ namespace ICSharpCode.Core
 		void AddExtensionPath(ExtensionPath path)
 		{
 			AddInTreeNode treePath = CreatePath(rootNode, path.Name);
-			ReadOnlyCollection<List<Codon>> pathGroupedCodons = path.GroupedCodons;
-			for(int i=0;i<pathGroupedCodons.Count;i++)
-				treePath.AddCodons(pathGroupedCodons[i]);
+			foreach (IList<Codon> innerCodons in path.GroupedCodons)
+				treePath.AddCodons(innerCodons);
 		}
 		
 		/// <summary>
@@ -242,20 +234,12 @@ namespace ICSharpCode.Core
 		/// </summary>
 		public void InsertAddIn(AddIn addIn)
 		{
-			Runtime runtime;
-			string addInRoot;
-			string bitmapResource;
-			string pathAddIn;
-			ResourceManager resourceManager;
-			string stringResource;
-
 			if (addIn.Enabled) {
 				foreach (ExtensionPath path in addIn.Paths.Values) {
 					AddExtensionPath(path);
 				}
 				
-				for (int j=0;j<addIn.Runtimes.Count;j++) {
-					runtime = addIn.Runtimes[j];
+				foreach (Runtime runtime in addIn.Runtimes) {
 					if (runtime.IsActive) {
 						foreach (var pair in runtime.DefinedDoozers) {
 							if (!doozers.TryAdd(pair.Key, pair.Value))
@@ -268,20 +252,18 @@ namespace ICSharpCode.Core
 					}
 				}
 				
-			 addInRoot = Path.GetDirectoryName(addIn.FileName);
-				for(int k=0;k<addIn.BitmapResources.Count;k++)
+				string addInRoot = Path.GetDirectoryName(addIn.FileName);
+				foreach(string bitmapResource in addIn.BitmapResources)
 				{
-					bitmapResource = addIn.BitmapResources[k];
-					pathAddIn = Path.Combine(addInRoot, bitmapResource);
-				    resourceManager = ResourceManager.CreateFileBasedResourceManager(Path.GetFileNameWithoutExtension(pathAddIn), Path.GetDirectoryName(pathAddIn), null);
+					string path = Path.Combine(addInRoot, bitmapResource);
+					ResourceManager resourceManager = ResourceManager.CreateFileBasedResourceManager(Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path), null);
 					ServiceSingleton.GetRequiredService<IResourceService>().RegisterNeutralImages(resourceManager);
 				}
-
-				for (int k = 0; k < addIn.StringResources.Count; k++)
+				
+				foreach(string stringResource in addIn.StringResources)
 				{
-					stringResource = addIn.StringResources[k];
-					pathAddIn = Path.Combine(addInRoot, stringResource);
-				    resourceManager = ResourceManager.CreateFileBasedResourceManager(Path.GetFileNameWithoutExtension(pathAddIn), Path.GetDirectoryName(pathAddIn), null);
+					string path = Path.Combine(addInRoot, stringResource);
+					ResourceManager resourceManager = ResourceManager.CreateFileBasedResourceManager(Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path), null);
 					ServiceSingleton.GetRequiredService<IResourceService>().RegisterNeutralStrings(resourceManager);
 				}
 			}
@@ -305,19 +287,14 @@ namespace ICSharpCode.Core
 		// used by Load(): disables an addin and removes it from the dictionaries.
 		void DisableAddin(AddIn addIn, SortedList<string, Version> dict, SortedList<string, AddIn> addInDict)
 		{
-			IList<string> keys = addIn.Manifest.Identities.Keys;
-			string name;
 			addIn.Enabled = false;
 			addIn.Action = AddInAction.DependencyError;
-	  	
-			
-			for (int i=0;i<keys.Count;i++ ) {
-				name = keys[i];
+			foreach (string name in addIn.Manifest.Identities.Keys) {
 				dict.Remove(name);
 				addInDict.Remove(name);
 			}
 		}
-		
+
 		/// <summary>
 		/// Loads a list of .addin files, ensuring that dependencies are satisfied.
 		/// This method is normally called by <see cref="CoreStartup.RunInitialization"/>.
@@ -425,7 +402,7 @@ namespace ICSharpCode.Core
 		private void CheckDependencies(List<AddIn> list, SortedList<string, Version> dict, SortedList<string, AddIn> addInDict)
 		{
 			Version versionFound;
-			ReadOnlyCollection< AddInReference > references;
+			ReadOnlyCollection<AddInReference> references;
 			AddInReference reference;
 			AddIn addIn;
 
@@ -475,7 +452,7 @@ namespace ICSharpCode.Core
 				}
 			}
 
-		
+
 		}
 	}
 }

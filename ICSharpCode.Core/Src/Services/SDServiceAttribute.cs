@@ -69,7 +69,7 @@ namespace ICSharpCode.Core
 	
 	sealed class FallbackServiceProvider : IServiceProvider
 	{
-		SortedList<Type, object> fallbackServiceDict = new SortedList<Type, object>();
+		Dictionary<Type, object> fallbackServiceDict = new Dictionary<Type, object>();
 		
 		public object GetService(Type serviceType)
 		{
